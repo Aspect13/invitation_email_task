@@ -15,8 +15,8 @@ jobs:
     env:
       LAMBDA_DIR: /tmp/lambda
       ARTEFACT_NAME: invitation_email_task.zip
-      LAMBDA_BUILDER: "lambci/lambda:build-python3.8"
-      LAMBDA_ENTRYPOINT: 'lambda_function.py'
+      LAMBDA_BUILDER: lambci/lambda:build-python3.8
+      LAMBDA_ENTRYPOINT: lambda_function.py
     steps:
     - uses: actions/checkout@v3
     - name: setting up docker builder
