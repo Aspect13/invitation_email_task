@@ -27,28 +27,30 @@ def lambda_handler(event: Optional[dict] = None, context=None):
     port = int(environ.get('port'))
     user = environ.get('user')
     passwd = environ.get('passwd')
-    sender = environ.get('sender')
+    sender = environ.get('sender', user)
     template = base64.b64decode(environ.get('template', '')).decode('utf-8')
     project_id = environ.get('project_id')
 
-    template_vars = {
-        'project_id': project_id
-    }
-    template_vars.update(event.get('template_vars', {}))
-
-    recipients = event.get('recipients', [])
-    if not recipients:
+    try:
+        recipients = event.pop('recipients')
+        if isinstance(recipients, str):
+            recipients = json.loads(recipients)
+    except KeyError:
         return {
             'statusCode': 500,
             'body': 'Specify recipients in event'
         }
-
     subject = event.get('subject', 'Invitation to centry project')
+
+    template_vars = {
+        'project_id': project_id
+    }
+    template_vars.update(event)
 
     try:
         with smtplib.SMTP_SSL(host=host, port=port) as client:
             client.ehlo()
-            client.login(user, passwd['value'])
+            client.login(user, passwd)
 
             for recipient in recipients:
                 user_template_vars = {**template_vars, 'recipient': recipient}
@@ -56,14 +58,15 @@ def lambda_handler(event: Optional[dict] = None, context=None):
 
                 msg_root = MIMEMultipart('alternative')
                 msg_root['Subject'] = subject
-                msg_root['From'] = sender
+                if sender:
+                    msg_root['From'] = sender
                 msg_root['To'] = recipient['email']
                 msg_root.attach(
                     MIMEText(email_content.render(user_template_vars), 'html')
                 )
                 client.sendmail(sender, recipient['email'], msg_root.as_string())
 
-                print(f'Email sent to {recipient["email"]}')
+                print(f'Email sent from {sender} to {recipient["email"]}')
     except Exception as e:
         from traceback import format_exc
         print(format_exc())
