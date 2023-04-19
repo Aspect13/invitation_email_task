@@ -28,7 +28,6 @@ def lambda_handler(event: Union[dict, list, None] = None, context=None):
             except ValueError:
                 ...
 
-
         host = environ.get('host')
         port = int(environ.get('port'))
         user = environ.get('user')
@@ -38,6 +37,15 @@ def lambda_handler(event: Union[dict, list, None] = None, context=None):
         sender = environ.get('sender', user)
         template = base64.b64decode(environ.get('template', '')).decode('utf-8')
         project_id = environ.get('project_id')
+        if debug_sleep:
+            print('event env', {
+                'host': {type(host), host},
+                'port': {type(port), port},
+                'user': {type(user), user},
+                'passwd': {type(passwd), passwd},
+                'sender': {type(sender), sender},
+                'project_id': {type(project_id), project_id},
+            })
 
         try:
             recipients: list[dict[str, list]] = e.pop('recipients')
