@@ -33,13 +33,19 @@ def lambda_handler(event: Optional[dict] = None, context=None):
 
     try:
         recipients = event.pop('recipients')
-        if isinstance(recipients, str):
-            recipients = json.loads(recipients)
     except KeyError:
-        return {
-            'statusCode': 500,
-            'body': 'Specify recipients in event'
-        }
+        try:
+            one_recipient = event.pop('one_recipient')
+            one_role = event.pop('one_role')
+            recipients = [{
+                'email': one_recipient,
+                'roles': [one_role]
+            }],
+        except KeyError:
+            return {
+                'statusCode': 500,
+                'body': 'Specify recipients in event'
+            }
     subject = event.get('subject', 'Invitation to centry project')
 
     template_vars = {
