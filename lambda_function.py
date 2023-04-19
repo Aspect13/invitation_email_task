@@ -9,7 +9,8 @@ from jinja2 import Template
 
 
 def lambda_handler(event: Optional[dict] = None, context=None):
-    debug_sleep = environ.get("debug_sleep")
+    print('running with event', event)
+    debug_sleep = environ.get('debug_sleep', event.get('debug_sleep'))
     if debug_sleep:
         print('sleeping for', debug_sleep)
         try:
