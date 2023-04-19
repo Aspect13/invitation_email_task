@@ -32,8 +32,10 @@ def lambda_handler(event: Union[dict, list, None] = None, context=None):
         port = int(environ.get('port'))
         user = environ.get('user')
         passwd = environ.get('passwd')
-        if isinstance(passwd, dict):
-            passwd = passwd['value']
+        try:
+            passwd = json.loads(passwd)['value']
+        except json.decoder.JSONDecodeError:
+            ...
         sender = environ.get('sender', user)
         template = base64.b64decode(environ.get('template', '')).decode('utf-8')
         project_id = environ.get('project_id')
