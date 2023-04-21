@@ -64,7 +64,7 @@ def lambda_handler(event: Union[dict, list, None] = None, context=None):
                     'statusCode': 500,
                     'body': 'Specify recipients in event'
                 }
-        subject = e.get('subject', 'Invitation to centry project')
+        subject = e.get('subject', 'Invitation to a Centry project')
 
         template_vars = {
             'project_id': project_id
@@ -81,7 +81,7 @@ def lambda_handler(event: Union[dict, list, None] = None, context=None):
                     email_content = Template(template)
 
                     msg_root = MIMEMultipart('alternative')
-                    msg_root['Subject'] = subject
+                    msg_root['Subject'] = Template(subject).render(user_template_vars)
                     if sender:
                         msg_root['From'] = sender
                     msg_root['To'] = recipient['email']
